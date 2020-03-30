@@ -15,3 +15,15 @@ For this task we are going to test different techniques of question answering, p
 
 ## Dataset
 Natalia, jak możesz uzupełnij opis datasetu. Przypominam, że działamy na SQuAD Dataset.
+
+# BiDAF Model
+## Introduction
+To help us understanding BiDAF model lets us first eqplain the general structure of neural network which enables the machine understanding the context as well as questions. 
+
+The first layer of the net is called **Embedding Layer** and it is responsible for converting sentences into words and words into its word embeded representation, using pretrained vector like *GloVe*. This type of representation is much better than one hot vector representing each word. How our problem we are going to use 100 dimensional *GloVe* word embedings.
+
+In the second layer we are going to use **Encoder Layer**, which used for giving each word a knowledge about its predecessors and succesors. To implement that layer we will use LSTM network. The output of this part will be the concatination of series of hidden vectors in forward and backward direction. The same layer is used to create hidden vectors for questions.
+<p align="center">
+  <img src = "https://imgur.com/eAhLaGD.png"/>
+</p>
+
