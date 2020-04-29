@@ -68,5 +68,11 @@ The data was in form of triplets - context, question and its answer span, which 
 To obtain vector representation of the text the GloVe Stanford embeding were used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space. A word embedings with dimensionality d = [50, 100, 200, 300], 6B tokens and vocabulary of size 400k, pretrained on Wikipedia and Gigaword were used. Words which couldn't be found in GloVe dictionary has been treated as 0 vectors. For tokenization of te words the basic tokenizer was used. At the end, the context with the question were converted to token ids indexed against the entire vocabulary. 
 
 ### Model Configuration
+The model was built and trained using tensorflow, because of its simplicity and abstraction which enabled creating the network by making only small changes to the existing LSTM layer. It also provides sequence to sequence models. In this case the BahdamuAttention were used. For the intermidiate callculations at each time step, a basic attention wrapper were used. Because its ability to use moving average of the paramters, the Adam algorithm were used for controlling the learning rate. For controlling learning process, the gradient was computed and the loss function minimized. 
 
+### Evaluate Metrics 
+For model evaluation we used described in the initial SQuAD paper ExactMatch metric. It measures the percentage of predictions that match one of the ground truth answers exactly.
+
+### Result 
+the final model was trained with 30 epochs of batch-size 32. Training each epoch took about 10 hours which gives almost two weeks of training. The ExactMatch of the model equaled to 0.60 which is still far behind the best solutions, but it can be still treated as satisfying result.
 
