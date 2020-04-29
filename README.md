@@ -59,6 +59,20 @@ The last layer used in our neural network is **Output Layer** which is a softmax
 
 In that case, the loss function is the sum of the cross-entropy loss for the start and end locations. It is minimized using Adam Optimizer.
 
+### Running the Scripts
+1. Create directories.
+- *\dwr*
+- *\squad*
+- *\data\squadDownload* 
+
+2.Download the dataset and glove vectors.
+- Glove Word Vectors: http://nlp.stanford.edu/data/glove.6B.zip (place it to *\dwr* folder)
+- SQuAD dataset: https://rajpurkar.github.io/SQuAD-explorer/ (place it to *\squad* folder)
+
+3.Run the scripts in following order
+- data_preprocessing.py
+- model.py
+
 ### Data Preprocessing
 The used SQuAD dataset consists of 2 files:
 - train-v2.0.json
