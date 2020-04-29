@@ -63,6 +63,7 @@ In that case the loss function is the sum of the cross-entropy loss for the star
 The used SQuAD dataset consists of 2 files:
 - train-v2.0.json
 - dev-v2.0.json
+
 The data was in form of triplets - context, question and its answer span, which is the answer with its start and end indiees. Those files were used to generate four new files containing a tokanized version of question, context and answer with its span. The important thing about those files is, that their lines are aligned in triplets. Each line in answer span consist of starting and ending indiees of corresponding context in which the answet can be found. 
 
 To obtain vector representation of the text the GloVe Stanford embeding were used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space. A word embedings with dimensionality d = [50, 100, 200, 300], 6B tokens and vocabulary of size 400k, pretrained on Wikipedia and Gigaword were used. Words which couldn't be found in GloVe dictionary has been treated as 0 vectors. For tokenization of te words the basic tokenizer was used. At the end, the context with the question were converted to token ids indexed against the entire vocabulary. 
