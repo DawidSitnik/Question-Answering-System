@@ -14,7 +14,22 @@ For this task, we are going to test different techniques of question answering, 
 * **Classical ML approaches like XGboost, Random Forest, Linear Regression, etc.**
 
 ## Dataset
-Natalia, jak możesz uzupełnij opis datasetu. Przypominam, że działamy na SQuAD Dataset.
+We are going to use the **Stanford Question Answering Dataset (SQuAD 2.0)** for training and evaluating our models. SQuAD is a reading comprehension dataset, consisting of questions posed by crowdworkers on a set of Wikipedia articles, where the answer to every question is a segment of text, or span, from the corresponding reading passage, or the question might be unanswerable.
+SQuAD2.0 combines the 100,000 questions in SQuAD1.1 with over 50,000 new, unanswerable questions written adversarially by crowdworkers to look similar to answerable ones. Samples in this dataset include (question, answer, context paragraph) tuples.
+#### Sample JSON file information used in SQuAD data set
+```
+{'data': [{'title': 'Super_Bowl_50',
+   'paragraphs': [{'context': 'Super Bowl 50 was an American football game to determine the champion of the National Football League (NFL) for the 2015 season. The American Football Conference (AFC) champion Denver Broncos defeated the National Football Conference (NFC) champion Carolina Panthers 24–10 to earn their third Super Bowl title. The game was played on February 7, 2016, at Levi\'s Stadium in the San Francisco Bay Area at Santa Clara, California. As this was the 50th Super Bowl, the league emphasized the "golden anniversary" with various gold-themed initiatives, as well as temporarily suspending the tradition of naming each Super Bowl game with Roman numerals (under which the game would have been known as "Super Bowl L"), so that the logo could prominently feature the Arabic numerals 50.',
+
+     	'qas': [{'answers': [{'answer_start': 177, 'text': 'Denver Broncos'},
+        	{'answer_start': 177, 'text': 'Denver Broncos'},
+        	{'answer_start': 177, 'text': 'Denver Broncos'}],
+       		'question': 'Which NFL team represented the AFC at Super Bowl 50?',
+       		'id': '56be4db0acb8001400a502ec'}]}]}],
+ 		'version': '1.1'}
+```
+To utilize our models for the Question and answering, there is a need of preparing the data similar to the SQuAD data structure mentioned.
+Because SQuAD is an ongoing effort, It's not exposed to the public as the open source dataset, sample data can be downloaded from [SQUAD site](https://rajpurkar.github.io/SQuAD-explorer/).
 
 ## BiDAF Model
 ### Introduction
@@ -91,3 +106,50 @@ For model evaluation, we used described in the initial SQuAD paper ExactMatch me
 ### Result 
 the final model was trained with 30 epochs of batch-size 32. Training each epoch took about 10 hours which gives almost two weeks of training. The exact match of the model equaled 0.60 which is still far behind the best solutions, but it can be still treated as a satisfying result.
 
+## BERT Model
+### Introduction
+BERT( Bidirectional Encoder Representations from Transformers) method of pre-training language representations. With the use of pre-trained BERT models, we can utilize pre-trained memory information of sentence structure, language, and text grammar-related memory of large corpus of millions, or billions, of annotated training examples, that it has trained.
+
+### How BERT works
+BERT makes use of **Transformer**, an attention mechanism that learns contextual relations between words (or sub-words) in a text. In its vanilla form, Transformer includes two separate mechanisms — an encoder that reads the text input and a decoder that produces a prediction for the task. Since BERT’s goal is to generate a language model, only the encoder mechanism is necessary. 
+As opposed to directional models, which read the text input sequentially (left-to-right or right-to-left), the Transformer encoder reads the entire sequence of words at once. Therefore it is considered **bidirectional**, though it would be more accurate to say that it’s non-directional. This characteristic allows the model to learn the context of a word based on all of its surroundings (left and right of the word). While the concept of bidirectional was around for a long time, BERT was first on its kind to successfully pre-train bidirectional in a deep neural network.
+
+#### BERT Input Format
+The input representation used by BERT is able to represent a single text sentence as well as a pair of sentences (eg., [Question, Answer]) in a single sequence of tokens.
+* The first token of every input sequence is the special classification token – **[CLS]**. This token is used in classification tasks as an aggregate of the entire sequence representation. It is ignored in non-classification tasks.
+* For sentence pair tasks, the WordPiece tokens of the two sentences are separated by another **[SEP]** token. This input sequence also ends with the **[SEP]** token.
+ Sentence Pair Input
+* A sentence embedding indicating Sentence A or Sentence B is added to each token. Sentence embeddings are similar to token/word embeddings with a vocabulary of 2.
+* A positional embedding is also added to each token to indicate its position in the sequence.
+
+#### Tokenization with BERT
+It has three main steps:
+1. Text normalization: Convert all whitespace characters to spaces, and (for the Uncased model) lowercase the input and strip out accent markers. E.g., *John Johanson's, → john johanson's,*.
+1. Punctuation splitting: Split all punctuation characters on both sides (i.e., add whitespace around all punctuation characters). Punctuation characters are defined as (a) Anything with a P* Unicode class, (b) any non-letter/number/space ASCII character (e.g., characters like $ which are technically not punctuation). E.g., *john johanson's, → john johanson ' s ,*
+1. WordPiece tokenization: Apply whitespace tokenization to the output of the above procedure, and apply WordPiece tokenization to each token separately. (Our implementation is directly based on the one from tensor2tensor, which is linked). E.g., *john johanson ' s , → john johan ##son ' s ,*.
+
+### Fine-Tuning
+Because pre-training is fairly expensive (hundreds of GPU hours needed to train the original BERT model from scratch), in our project we are going to use the **pre-trained BERT model**, add an untrained layer of neurons on the end, and train the new model for our question answering task. The authors recommend only 2-4 epochs of training for fine-tuning BERT on a specific NLP task. We are going to train model with 2 epochs of batch-size 24.
+BERT has release BERT-Base and BERT-Large models. We are going to use *BERT-Large-Uncased Model*: huge model, with 24 Transformer blocks, 1024 hidden units in each layer, and 340M parameters. This model is pre-trained on 40 epochs over a 3.3 billion word corpus, including BooksCorpus (800 million words) and English Wikipedia (2.5 billion words). (Uncased means that the text has been lowercased before WordPiece tokenization, e.g., John Smith becomes john smith.)
+
+### Testing and Results
+The whole fine-tuning and predicting process of BERT model with Cloud TPU is contained in the script: *finetuning_and_predicition.ipynb*.
+It took 30 minutes on a single Cloud TPU to fine-tune BERT for Question Answering task.
+Prediction results:
+```
+{
+  "exact": 76.21494146382548,
+  "f1": 79.26313095827322,
+  "total": 11873,
+  "HasAns_exact": 76.75438596491227,
+  "HasAns_f1": 82.85950638791795,
+  "HasAns_total": 5928,
+  "NoAns_exact": 75.67703952901599,
+  "NoAns_f1": 75.67703952901599,
+  "NoAns_total": 5945,
+  "best_exact": 77.5878042617704,
+  "best_exact_thresh": -7.583559513092041,
+  "best_f1": 80.32618854039865,
+  "best_f1_thresh": -5.022722780704498
+}
+```
