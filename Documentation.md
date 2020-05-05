@@ -73,37 +73,10 @@ The last layer used in our neural network is **Output Layer** which is a softmax
 
 In that case, the loss function is the sum of the cross-entropy loss for the start and end locations. It is minimized using Adam Optimizer.
 
-### Running the Scripts
-1. Create directories.
-- *\dwr*
-- *\squad*
-- *\data\squadDownload* 
-
-2.Download the dataset and glove vectors.
-- Glove Word Vectors: http://nlp.stanford.edu/data/glove.6B.zip (place it to *\dwr* folder)
-- SQuAD dataset: https://rajpurkar.github.io/SQuAD-explorer/ (place it to *\squad* folder)
-
-3.Run the scripts in following order
-- data_preprocessing.py
-- model.py
-
 ### Data Preprocessing
-The used SQuAD dataset consists of 2 files:
-- train-v2.0.json
-- dev-v2.0.json
-
 The data was in the form of triplets - context, question, and its answer span, which is the answer with its start and end indices. Those files were used to generate four new files containing a tokenized version of the question, context, and answer with its span. The important thing about those files is, that their lines are aligned in triplets. Each line in answer span consists of starting and ending indices of the corresponding context in which the answer can be found. 
 
-To obtain vector representation of the text the GloVe Stanford embedding was used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space. A word embeddings with dimensionality d = [50, 100, 200, 300], 6B tokens, and vocabulary of size 400k, pre-trained on Wikipedia, and Gigaword were used. Words that couldn't be found in the GloVe dictionary has been treated as 0 vectors. For the tokenization of the words, the basic tokenizer was used. In the end, the context with the question was converted to token ids indexed against the entire vocabulary. 
-
-### Model Configuration
-The model was built and trained using TensorFlow, because of its simplicity and abstraction which enabled creating the network by making only small changes to the existing LSTM layer. It also provides sequence to sequence models. In this case, the BahdamuAttention was used. For the intermediate calculations at each time step, a basic attention wrapper was used. Because of its ability to use the moving average of the parameters, the Adam algorithm was used for controlling the learning rate. For controlling the learning process, the gradient was computed and the loss function minimized. 
-
-### Evaluate Metrics 
-For model evaluation, we used described in the initial SQuAD paper ExactMatch metric. It measures the percentage of predictions that match one of the ground truth answers exactly.
-
-### Result 
-the final model was trained with 30 epochs of batch-size 32. Training each epoch took about 10 hours which gives almost two weeks of training. The exact match of the model equaled 0.60 which is still far behind the best solutions, but it can be still treated as a satisfying result.
+To obtain vector representation of the text the GloVe Stanford embedding was used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space.  For the tokenization of the words, the basic tokenizer was used. In the end, the context with the question was converted to token ids indexed against the entire vocabulary. 
 
 ## BERT Model
 ### Introduction
@@ -130,28 +103,6 @@ It has three main steps:
 ### Fine-Tuning
 Because pre-training is fairly expensive (hundreds of GPU hours needed to train the original BERT model from scratch), in our project we are going to use the **pre-trained BERT model**, add an untrained layer of neurons on the end, and train the new model for our question answering task. The authors recommend only 2-4 epochs of training for fine-tuning BERT on a specific NLP task. We are going to train model with 2 epochs of batch-size 24.
 BERT has release BERT-Base and BERT-Large models. We are going to use *BERT-Large-Uncased Model*: huge model, with 24 Transformer blocks, 1024 hidden units in each layer, and 340M parameters. This model is pre-trained on 40 epochs over a 3.3 billion word corpus, including BooksCorpus (800 million words) and English Wikipedia (2.5 billion words). (Uncased means that the text has been lowercased before WordPiece tokenization, e.g., John Smith becomes john smith.)
-
-### Testing and Results
-The whole fine-tuning and predicting process of BERT model with Cloud TPU is contained in the script: *finetuning_and_predicition.ipynb*.
-It took 30 minutes on a single Cloud TPU to fine-tune BERT for Question Answering task.
-Prediction results:
-```html
-{
-  "exact": 76.21494146382548,
-  "f1": 79.26313095827322,
-  "total": 11873,
-  "HasAns_exact": 76.75438596491227,
-  "HasAns_f1": 82.85950638791795,
-  "HasAns_total": 5928,
-  "NoAns_exact": 75.67703952901599,
-  "NoAns_f1": 75.67703952901599,
-  "NoAns_total": 5945,
-  "best_exact": 77.5878042617704,
-  "best_exact_thresh": -7.583559513092041,
-  "best_f1": 80.32618854039865,
-  "best_f1_thresh": -5.022722780704498
-}
-```
 
 ## Classical ML approaches
 
