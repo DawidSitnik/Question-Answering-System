@@ -74,8 +74,6 @@ The last layer used in our neural network is **Output Layer** which is a softmax
 In that case, the loss function is the sum of the cross-entropy loss for the start and end locations. It is minimized using Adam Optimizer.
 
 ### Data Preprocessing
-The data was in the form of triplets - context, question, and its answer span, which is the answer with its start and end indices. Those files were used to generate four new files containing a tokenized version of the question, context, and answer with its span. The important thing about those files is, that their lines are aligned in triplets. Each line in answer span consists of starting and ending indices of the corresponding context in which the answer can be found. 
-
 To obtain vector representation of the text the GloVe Stanford embedding was used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space.  For the tokenization of the words, the basic tokenizer was used. In the end, the context with the question was converted to token ids indexed against the entire vocabulary. 
 
 ## BERT Model
