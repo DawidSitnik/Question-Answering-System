@@ -73,9 +73,6 @@ The last layer used in our neural network is **Output Layer** which is a softmax
 
 In that case, the loss function is the sum of the cross-entropy loss for the start and end locations. It is minimized using Adam Optimizer.
 
-### Data Preprocessing
-To obtain vector representation of the text the GloVe Stanford embedding was used. GloVe performs training on aggregated global word-word co-occurrence statistics from a corpus and the resulting representation showcase interesting linear substructures of the word vector space.  For the tokenization of the words, the basic tokenizer was used. In the end, the context with the question was converted to token ids indexed against the entire vocabulary. 
-
 ## BERT Model
 ### Introduction
 BERT( Bidirectional Encoder Representations from Transformers) method of pre-training language representations. With the use of pre-trained BERT models, we can utilize pre-trained memory information of sentence structure, language, and text grammar-related memory of large corpus of millions, or billions, of annotated training examples, that it has trained.
