@@ -156,17 +156,44 @@ Prediction results:
 ## Classical ML approaches
 
 ### Introduction
-The above-mentioned methods are designed specially for NLP and Machine Comprehension problems solving. However, since traditional Machine Learning methods are well known, it is worth to give them a try. Unfortunately, they are too simple for a problem as complicated as question answering and to find the exact answer, so for this part of the project we will only look for a sentence in a context containing the answer, not the exact answer itself.
+The above-mentioned methods are designed specially for NLP and Machine Comprehension problems solving. However, since traditional Machine Learning methods are well known and quite easy to understand, it is worth to give them a try. Unfortunately, they are too simple for a problem as complicated as question answering and to find the exact answer, so for this part of the project we will only look for a sentence in a context containing the answer, not the exact answer itself.
 
-### Data preprocessing
-In this scenario, the data is preprocessed using Facebook Sentence Embedding - **InferSent**. It is a more advanced embedding than traditional approaches (e.g. GloVe) as it not only derives semantic relationships between words from the co-occurrence matrices, but it analyses the sentence as a whole. For instance, the order of the words in a sentence, which can sometimes change its meaning, is important for InferSent, while for GloVe it is not. The tool has been trained on natural language inference data.
+### Sentence embeddings
+In this scenario, the data is preprocessed using Facebook Sentence Embedding - **InferSent**. It is a more advanced embedding than traditional approaches as it not only derives semantic relationships between words from the co-occurrence matrices, but it analyses the sentence as a whole. For instance, the order of the words in a sentence, which can sometimes change its meaning, is important for InferSent, while for GloVe it is not. The tool has been trained on natural language inference data. For each sentence, a 4096-dimensional vector of numbers is returned.
 
-In order to provide a set of sentences to be analyzed, the context needs to be split into valid sentences (tokenized). In this project, the tool used for this task is **TextBlob** - a Python library with various features that might be helpful in solving NLP problems.
+Infersent requires a set of word embeddings. In this project GloVe vector has been used for that. In order to provide a set of sentences to be analyzed, the context needs to be split into valid sentences (tokenized). The **TextBlob** library has been used to achieve that.
 
-InferSent returns a vector representation of each sentence and question. For each sentence-question pair a set of features has to be created based on statistics methods.
+In the program, all the sentences from all the contexts and all the questions (over 150000 sentences in total) have been transformed into 4096-dimensional vectors. Due to a large number of calculations required, his step took a lot of time - about 12 hours. In the script this step was also divided into eight sub-steps due to memory problems that have appeared.
+
+### Features creation
+To simplify the process, contexts with more than 12 sentences and questions referring to them are deleted from the data set. This doesn't make a big difference, as there are only a few very long contexts in SQuAD.
+
+Using vectors created with InferSent, for each question-sentence pair two distance measures are counted:
+* **Euclidean distance** - the 'ordinary' straight-line distance between two points in Euclidean space. Maximum value for this data set: 10.
+* **Cosine distance** - it equals the cosine of the angle between two points in the space. Maximum possible value: 1.
+
+For shorter contexts, values of missing questions are replaced with maximum values available, so that the sentence would not be considered as a correct one due to a big distance between it and a question.
+
+Each sentence in a context has now a set of values describing their 'distance' from the question, so for each context-question pair there are 24 features provided.
+
+### Train and test sets
+Instead of using the SQuAD *dev-v2.0.json* set for testing the models, the *train-v2.0.json* is randomly split into test and train data. This approach allows us to run the scripts with different sizes of the sets and have a different split every time. The library used for that is *scikit-learn*.
 
 ### Algorithms
 Three popular ML algorithms are used to train and test the data. All of them are based on supervised learning.
 * **Multinomial logistic regression** - a simple classification algorithm used to predict the probabilities of each class based on the input and returning the result class.
 * **Random forest** - creating a number of different decision trees during training phase and returning the class (sentence) based on mode of the results of all trees. Each tree has multiple nodes, where the records are divided in two or more branches based on one of the features. At the bottom of each the leaves determining a record class are created.
 * **Gradient boosting** - a classification technique producing a strong model based on a number of weak models (such as decision trees). It optimizes their results based on counting a loss function. For the implementation, the XGboost library, providing some extra feautres, is used.
+
+First two algorithms are implemented in the above-mentioned *scikit-learn* library. All the classifiers have a variety of parameters that can be adjusted depending on our needs, but for this project most of them are left default, as the results they return are satisfying.
+
+### Results
+The accuracy of classifiers for testing data is presented below:
+* Multinominal logistic regression: 64,8 %
+* Random forest: 69%
+* Gradient boosting: 71%
+
+The results are surprisingly high, regarding that none of the algorithms is designed for question answering problems solving. Probably the biggest credit for it goes to Facebook for creating a great tool for sentence embedding. The biggest problem is that the program returns only the sentence containing the answer, not the answer itself, so probably it could not be used in business systems, but the accuracy is high enough to solve simple problems.
+
+## Conclusion
+To conclude, we have created three tools solving a Question Answering problem. Their performances are at 60-76%, which is a good result. For the future work, the advantages of each of them could be combined to make even a better performance (e.g. using Facebook Sentence Embedding instead of GloVe in BiDAF model). BiDAF model has the highest accuracy, so it could be successfully used in real-life applications.
